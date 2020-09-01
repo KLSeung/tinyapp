@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const PORT = 8080; //default port 8080
+const ejsLint = require('ejs-lint');
 
 app.set('view engine', 'ejs');
 
@@ -19,7 +20,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let requestedURL = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  let requestedURL = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", requestedURL);
 });
 
