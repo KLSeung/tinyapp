@@ -45,7 +45,7 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
   urlDatabase[randomString] = req.body.longURL;
-  res.redirect(`/urls/${randomString}`);  
+  res.redirect(`/urls/${randomString}`);
 });
 
 
@@ -67,6 +67,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
+// POST method once user edits the longURL of a pre-existing shortURL
+app.post("/urls/:shortURL/edit", (req, res) => {
+  urlDatabase[req.params.shortURL] = req.body.newLongURL;
+  res.redirect('/urls');
+});
 
 //Server listen to PORT which is 8080
 app.listen(PORT, () => {
