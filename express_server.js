@@ -7,6 +7,11 @@ const bodyParser = require("body-parser");
 
 app.use(bodyParser.urlencoded({extended: true}));
 
+//require cookie parser as a dependency
+const cookieParser = require('cookie-parser');
+
+app.use(cookieParser());
+
 //Set view engine as ejs
 app.set('view engine', 'ejs');
 
@@ -67,9 +72,16 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
-// POST method once user edits the longURL of a pre-existing shortURL
+//POST method once user edits the longURL of a pre-existing shortURL
 app.post("/urls/:shortURL/edit", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.newLongURL;
+  res.redirect('/urls');
+});
+
+//POST method for user login to set cookies
+app.post("/login", (req, res) => {
+  console.log('Cookies: ', res.cookie('name', req.body.username));
+
   res.redirect('/urls');
 });
 
