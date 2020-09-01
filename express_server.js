@@ -19,11 +19,11 @@ const urlDatabase = {
 const generateRandomString = () => {
   const alphaNumeric = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let randomString = '';
-  for (let i = 0; i < 6; i++) { 
-    randomString += alphaNumeric[Math.round(Math.random() * alphaNumeric.length - 1)]
+  for (let i = 0; i < 6; i++) {
+    randomString += alphaNumeric[Math.round(Math.random() * alphaNumeric.length - 1)];
   }
   return randomString;
-}
+};
 
 //GET root directory
 app.get('/', (req, res) => {
@@ -41,21 +41,22 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-//POST new url onto url_new
+//POST new shortURL - longURL pair onto urlDatabase and redirect to the new shortURL
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const randomString = generateRandomString();
+  urlDatabase[randomString] = req.body.longURL;  // Log the POST request body to the console
+  res.redirect(`/urls/${randomString}`);         // Respond with 'Ok' (we will replace this)
 });
 
 
-//GET requested shortURL with its corresponding longURL and render both onto urls_show 
+//GET requested shortURL with its corresponding longURL and render both onto urls_show
 app.get("/urls/:shortURL", (req, res) => {
   let requestedURL = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", requestedURL);
 });
 
 
-//Server listen to PORT which is 8080 
+//Server listen to PORT which is 8080
 app.listen(PORT, () => {
   console.log(`TinyApp listening on port: ${PORT}`);
 });
