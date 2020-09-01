@@ -55,6 +55,12 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", requestedURL);
 });
 
+//GET requested shortURL and redirect to the longURL 
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL]
+  res.redirect(longURL);
+});
+
 
 //Server listen to PORT which is 8080
 app.listen(PORT, () => {
