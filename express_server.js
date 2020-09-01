@@ -14,12 +14,13 @@ app.get('/', (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
-  res.render("urls_index", templateVars);
+  let urlList = { urls: urlDatabase };
+  res.render("urls_index", urlList);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body><p>Hello <b>World</b></p></body></html>\n")
+app.get("/urls/:shortURL", (req, res) => {
+  let requestedURL = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  res.render("urls_show", requestedURL);
 });
 
 app.listen(PORT, () => {
