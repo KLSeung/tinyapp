@@ -48,7 +48,10 @@ app.get("/urls", (req, res) => {
 
 //GET new route to render urls_new
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_new", templateVars);
 });
 
 //POST new shortURL - longURL pair onto urlDatabase and redirect to the new shortURL
@@ -61,8 +64,12 @@ app.post("/urls", (req, res) => {
 
 //GET requested shortURL with its corresponding longURL and render both onto urls_show
 app.get("/urls/:shortURL", (req, res) => {
-  let requestedURL = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
-  res.render("urls_show", requestedURL);
+  let templateVars = {
+    username: req.cookies["username"],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
+  };
+  res.render("urls_show", templateVars);
 });
 
 //GET requested shortURL and redirect to the longURL
