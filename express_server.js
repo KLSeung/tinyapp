@@ -37,8 +37,13 @@ app.get('/', (req, res) => {
 
 //GET urls to render url list into urls_index
 app.get("/urls", (req, res) => {
-  let urlList = { urls: urlDatabase };
-  res.render("urls_index", urlList);
+  let templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase
+  };
+
+  // let urlList = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
 });
 
 //GET new route to render urls_new
@@ -80,8 +85,13 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 
 //POST method for user login to set cookies
 app.post("/login", (req, res) => {
-  console.log('Cookies: ', res.cookie('name', req.body.username));
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');
+});
 
+//POST method for user to logout
+app.post("/logout", (req, res) => {
+  res.clearCookie('username');
   res.redirect('/urls');
 });
 

@@ -6,19 +6,25 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-item nav-link" href="/urls">My URLs</a>
-          </li>
-          <li>
-            <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-          </li>
-        </ul>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-item nav-link" href="/urls">My URLs</a>
+        </li>
+        <li>
+          <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        </li>
+      </ul>
+      <% if (!username) { %>       
         <form class="form-inline my-2 my-lg-0" method="POST" action="/login">
           <input class="form-control mr-sm-2" type="text" placeholder="Type Username..." name="username">
           <button class="btn btn-primary my-2 my-sm-0" type="submit">Login</button>
         </form>
-      </div>
+      <% } else { %>
+        <span class ="pr-4 nav-link">Logged in as: <%= username %>  </span>
+        <form class="form-inline" method="POST" action="/logout"> 
+          <button class="btn btn-danger my-2 my-sm-0">Logout</button>
+        </form>
+      <% } %>
     </div>
   </nav>
 </header>
