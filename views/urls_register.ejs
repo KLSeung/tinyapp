@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <title>TinyApp</title>
+</head>
+<body>
+  <header>
+    <%- include ("./partials/_header") %>
+  </header>
+  <div class="row align-items-center justify-content-center mt-5">
+    <div class="card text-center w-50">
+      <div class="card-header">Create an Account</div>
+      <div class="card-body">
+      <form method="POST" action="/register">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend col-5">
+            <span class="input-group-text col-12">Email Address:</span>
+          </div>
+          <input class="form-control" type="email" name="email" placeholder="Type email address..."> 
+        </div>
+        <div class="input-group">
+          <div class="input-group-prepend col-5">
+            <span class="input-group-text col-12">Password:</span>
+          </div>
+          <input class="form-control w-25" type="password" name="password" placeholder="Type Password"> 
+        </div>
+        <button class="btn btn-primary my-sm-4" type="submit">Register</button>
+      </form>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

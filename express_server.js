@@ -61,6 +61,22 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
+//GET method for registration page
+app.get("/register", (req, res) => {
+  let templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_register", templateVars);
+});
+
+app.post("/register", (req, res) => {
+  let templateVars = {
+    username: req.body.email,
+    password: req.body.password
+  };
+  console.log(templateVars);
+  res.redirect("urls");
+});
 
 //GET requested shortURL with its corresponding longURL and render both onto urls_show
 app.get("/urls/:shortURL", (req, res) => {
