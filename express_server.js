@@ -25,42 +25,21 @@ const bcrypt = require('bcrypt');
 app.set('view engine', 'ejs');
 
 //Global url Database
-const urlDatabase = {
-  "b2xVn2": { longURL: "http://www.lighthouselabs.ca" , userID: "fa21" },
-  "9sm5xK": { longURL: "http://www.google.com", userID: "wd12" }
-};
+const urlDatabase = {};
 
 //Global user information
 const users = {};
 
-//Generates random strings for shortURL
-const generateRandomString = () => {
-  const alphaNumeric = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let randomString = '';
-  for (let i = 0; i < 6; i++) {
-    randomString += alphaNumeric[Math.round(Math.random() * alphaNumeric.length - 1)];
-  }
-  return randomString;
-};
-
-//Import module that returns the user object given the user's email and users database 
-const { findUserByEmail } = require('./helpers');
-
-//Filters out the list of urls with the corresponding userID
-const urlsForUser = (database, id) => {
-  const newUrlDatabase = {};
-  for (let url in database) {
-    const shortURL = database[url];
-    if (shortURL.userID === id) {
-      newUrlDatabase[url] = shortURL;
-    }
-  }
-  return newUrlDatabase;
-};
+//Import helper functions
+const { findUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
 
 //GET root directory
 app.get('/', (req, res) => {
-  res.send("Hello!");
+  const userID = req.session.user_id;
+  if (!userID) {
+    res.redirect("/login");
+  }
+  res.redirect("/urls");
 });
 
 //GET urls to render url list into urls_index
@@ -77,6 +56,7 @@ app.get("/urls", (req, res) => {
 //GET new route to render urls_new
 app.get("/urls/new", (req, res) => {
   const userID = req.session.user_id;
+  //Check if user is not logged in
   if (!userID) {
     res.redirect("/login");
   }
@@ -89,14 +69,20 @@ app.get("/urls/new", (req, res) => {
 //POST new shortURL - longURL pair onto urlDatabase and redirect to the new shortURL
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
+  //Add new url with the random string generated as its shortURL and attach the longURL and userID to it
   urlDatabase[randomString] = { longURL: req.body.longURL, userID: req.session.user_id };
   res.redirect(`/urls/${randomString}`);
 });
 
 //GET method for registration page
 app.get("/register", (req, res) => {
+  const user = users[req.session.user_id];
+  //Check if user is already logged in
+  if (user) {
+    res.redirect('/urls');
+  }
   let templateVars = {
-    user:  users[req.session.user_id]
+    user
   };
   res.render("urls_register", templateVars);
 });
@@ -105,31 +91,39 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
 
+  //Check if user inputted blank email or password
   if (!email || !password) {
     return res.status('400').send('Email or password cannot be blank!');
   }
-
+  //Check if user with the same email address already exists
   const foundUser = findUserByEmail(email, users);
   if (foundUser) {
     return res.status('400').send('User with this email address already exists!');
   }
-
+  //Hash password using bcrypt
   const hashedPassword = bcrypt.hashSync(password, 10);
-
+  //Create uniqueID for each user
   const uuid = uuidv4().split("-")[2];
   users[uuid]  = {
     id: uuid,
     email,
     password: hashedPassword
   };
+
+  //Set user session
   req.session.user_id = uuid;
   res.redirect("urls");
 });
 
 //GET method for login page
 app.get("/login", (req, res) => {
+  const user = users[req.session.user_id];
+  //Check if user is already logged in
+  if (user) {
+    res.redirect('/urls');
+  }
   let templateVars = {
-    user:  users[req.session.user_id]
+    user
   };
   res.render("urls_login", templateVars);
 });
@@ -137,47 +131,57 @@ app.get("/login", (req, res) => {
 //POST method for user login to set cookies
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
+  //Check if user inputted blank email or password
   if (!email || !password) {
     return res.status('403').send("Email or password cannot be blank!");
   }
-  
+  //Check if inputted email address and password combination matches
   const foundUser = findUserByEmail(email, users);
-  if (foundUser === null) {
-    return res.status('403').send("User with this email address does not exist!");
+  if (foundUser === null || !bcrypt.compareSync(password, foundUser.password)) {
+    return res.status('403').send("Email address and password combination does not match!");
   }
   
-  if (!bcrypt.compareSync(password, foundUser.password)) {
-    return res.status('403').send("Password does not match email address");
-  }
-
+  //Set user session
   req.session.user_id = foundUser.id;
-  // res.cookie('user_id', foundUser.id);
   res.redirect('/urls');
 });
 
 //GET requested shortURL with its corresponding longURL and render both onto urls_show
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+  
+  //Check if this shortURL exists
+  if (!urlDatabase[shortURL]) {
+    return res.status('403').send("This shortURL does not exist!");
+  }
+
   const userID = req.session.user_id;
+
   let templateVars = {
     user:  users[userID],
     shortURL: shortURL,
     longURL: urlDatabase[shortURL].longURL,
-    userID: userID,
-    shortURLUser: urlDatabase[shortURL].userID
+    userID,
+    shortURLUser: urlDatabase[shortURL].userID,
   };
   res.render("urls_show", templateVars);
 });
 
 //GET requested shortURL and redirect to the longURL
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
+  const shortURL = req.params.shortURL;
+  //Check if this shortURL exists
+  if (!urlDatabase[shortURL]) {
+    return res.status('403').send("This shortURL does not exist!");
+  }
+  const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
 //POST request to remove url resource
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
+  //Check if the user has permission to delete the shortURL
   if (req.session.user_id !== urlDatabase[shortURL].userID) {
     return res.status('400').send("You don't have permission to delete this url \n");
   }
@@ -188,6 +192,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //POST method once user edits the longURL of a pre-existing shortURL
 app.post("/urls/:shortURL/edit", (req, res) => {
   const shortURL = req.params.shortURL;
+  //Check if the user has permission to edit the shortURL
   if (req.session.user_id !== urlDatabase[shortURL].userID) {
     return res.status('400').send("You don't have permission to edit this url \n");
   }
