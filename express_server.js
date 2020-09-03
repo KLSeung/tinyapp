@@ -48,6 +48,18 @@ const findUserByEmail = (email) => {
   return null;
 };
 
+//Filters out the list of urls with the corresponding userID
+const urlsForUser = (database, id) => {
+  const newUrlDatabase = {};
+  for (let url in database) {
+    const shortURL = database[url];
+    if (shortURL.userID === id) {
+      newUrlDatabase[url] = shortURL;
+    }
+  }
+  return newUrlDatabase;
+};
+
 //GET root directory
 app.get('/', (req, res) => {
   res.send("Hello!");
@@ -55,9 +67,11 @@ app.get('/', (req, res) => {
 
 //GET urls to render url list into urls_index
 app.get("/urls", (req, res) => {
+  const userID = req.cookies["user_id"];
+  const userURLS = urlsForUser(urlDatabase, userID);
   let templateVars = {
-    user: users[req.cookies["user_id"]],
-    urls: urlDatabase
+    user: users[userID],
+    urls: userURLS
   };
   res.render("urls_index", templateVars);
 });
@@ -77,7 +91,6 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
   urlDatabase[randomString] = { longURL: req.body.longURL, userID: req.cookies["user_id"] };
-  console.log(urlDatabase);
   res.redirect(`/urls/${randomString}`);
 });
 
@@ -143,10 +156,13 @@ app.post("/login", (req, res) => {
 
 //GET requested shortURL with its corresponding longURL and render both onto urls_show
 app.get("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
   let templateVars = {
     user:  users[req.cookies["user_id"]],
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL
+    shortURL: shortURL,
+    longURL: urlDatabase[shortURL].longURL,
+    userID: req.cookies["user_id"],
+    shortURLUser: urlDatabase[shortURL].userID
   };
   res.render("urls_show", templateVars);
 });
