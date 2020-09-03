@@ -95,7 +95,7 @@ app.post("/register", (req, res) => {
 
   if (!email || !password) {
     return res.status('400').send('Email or password cannot be empty!');
-  } 
+  }
 
   const foundUser = findUserByEmail(email);
   if (foundUser) {
@@ -108,8 +108,15 @@ app.post("/register", (req, res) => {
     password
   };
   res.cookie('user_id', uuid);
-  console.log(users);
   res.redirect("urls");
+});
+
+//GET method for login page
+app.get("/login", (req, res) => {
+  let templateVars = {
+    user:  users[req.cookies["user_id"]]
+  };
+  res.render("urls_login", templateVars);
 });
 
 //GET requested shortURL with its corresponding longURL and render both onto urls_show
@@ -140,11 +147,11 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   res.redirect('/urls');
 });
 
-//POST method for user login to set cookies
-app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
-});
+// //POST method for user login to set cookies
+// app.post("/login", (req, res) => {
+//   res.cookie('username', req.body.username);
+//   res.redirect('/urls');
+// });
 
 //POST method for user to logout
 app.post("/logout", (req, res) => {
