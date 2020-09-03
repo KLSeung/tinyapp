@@ -61,8 +61,6 @@ app.get("/urls", (req, res) => {
     user: users[req.cookies["user_id"]],
     urls: urlDatabase
   };
-  console.log(templateVars);
-  // let urlList = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
@@ -93,8 +91,9 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
 
+ 
   if (!email || !password) {
-    return res.status('400').send('Email or password cannot be empty!');
+    return res.status('400').send('Email or password cannot be blank!');
   }
 
   const foundUser = findUserByEmail(email);
@@ -104,6 +103,7 @@ app.post("/register", (req, res) => {
 
   const uuid = uuidv4().split("-")[2];
   users[uuid]  = {
+    id: uuid,
     email,
     password
   };
@@ -117,6 +117,26 @@ app.get("/login", (req, res) => {
     user:  users[req.cookies["user_id"]]
   };
   res.render("urls_login", templateVars);
+});
+
+//POST method for user login to set cookies
+app.post("/login", (req, res) => {
+  const { email, password } = req.body
+  if (!email || !password) {
+    return res.status('403').send("Email or password cannot be blank!");
+  }
+
+  const foundUser = findUserByEmail(email);
+  if(foundUser === null) {
+    return res.status('403').send("User with this email address does not exist!")
+  }
+
+  if (foundUser.password !== password) {
+    return res.status('403').send("Password does not match email address");
+  }
+
+  res.cookie('user_id', foundUser.id);
+  res.redirect('/urls');
 });
 
 //GET requested shortURL with its corresponding longURL and render both onto urls_show
@@ -146,12 +166,6 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.newLongURL;
   res.redirect('/urls');
 });
-
-// //POST method for user login to set cookies
-// app.post("/login", (req, res) => {
-//   res.cookie('username', req.body.username);
-//   res.redirect('/urls');
-// });
 
 //POST method for user to logout
 app.post("/logout", (req, res) => {
