@@ -157,11 +157,12 @@ app.post("/login", (req, res) => {
 //GET requested shortURL with its corresponding longURL and render both onto urls_show
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+  const userID = req.cookies["user_id"];
   let templateVars = {
-    user:  users[req.cookies["user_id"]],
+    user:  users[userID],
     shortURL: shortURL,
     longURL: urlDatabase[shortURL].longURL,
-    userID: req.cookies["user_id"],
+    userID: userID,
     shortURLUser: urlDatabase[shortURL].userID
   };
   res.render("urls_show", templateVars);
@@ -175,13 +176,21 @@ app.get("/u/:shortURL", (req, res) => {
 
 //POST request to remove url resource
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  const shortURL = req.params.shortURL;
+  if (req.cookies["user_id"] !== urlDatabase[shortURL].userID) {
+    return res.status('400').send("You don't have permission to delete this url \n");
+  }
+  delete urlDatabase[shortURL];
   res.redirect(`/urls`);
 });
 
 //POST method once user edits the longURL of a pre-existing shortURL
 app.post("/urls/:shortURL/edit", (req, res) => {
-  urlDatabase[req.params.shortURL].longURL = req.body.newLongURL;
+  const shortURL = req.params.shortURL;
+  if (req.cookies["user_id"] !== urlDatabase[shortURL].userID) {
+    return res.status('400').send("You don't have permission to edit this url \n");
+  }
+  urlDatabase[shortURL].longURL = req.body.newLongURL;
   res.redirect('/urls');
 });
 
