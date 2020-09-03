@@ -43,16 +43,8 @@ const generateRandomString = () => {
   return randomString;
 };
 
-//Checks if user already exists or if the email or password inputted is blank
-const findUserByEmail = (email, database) => {
-  for (let id in database) {
-    const user = database[id];
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return null;
-};
+//Import module that returns the user object given the user's email and users database 
+const { findUserByEmail } = require('./helpers');
 
 //Filters out the list of urls with the corresponding userID
 const urlsForUser = (database, id) => {
