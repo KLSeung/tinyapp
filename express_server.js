@@ -20,8 +20,8 @@ app.set('view engine', 'ejs');
 
 //Global url Database
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca" , userID: "fa21" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "wd12" }
 };
 
 //Global user information
@@ -76,7 +76,8 @@ app.get("/urls/new", (req, res) => {
 //POST new shortURL - longURL pair onto urlDatabase and redirect to the new shortURL
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
-  urlDatabase[randomString] = req.body.longURL;
+  urlDatabase[randomString] = { longURL: req.body.longURL, userID: req.cookies["user_id"] };
+  console.log(urlDatabase);
   res.redirect(`/urls/${randomString}`);
 });
 
@@ -145,14 +146,14 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     user:  users[req.cookies["user_id"]],
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL].longURL
   };
   res.render("urls_show", templateVars);
 });
 
 //GET requested shortURL and redirect to the longURL
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -164,7 +165,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //POST method once user edits the longURL of a pre-existing shortURL
 app.post("/urls/:shortURL/edit", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.newLongURL;
+  urlDatabase[req.params.shortURL].longURL = req.body.newLongURL;
   res.redirect('/urls');
 });
 
