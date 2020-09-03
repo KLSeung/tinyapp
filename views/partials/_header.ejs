@@ -14,7 +14,7 @@
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         </li>
       </ul>
-      <% if (!username) { %>       
+      <% if (!user) { %>       
         <form class="form-inline my-2 my-lg-0" method="POST" action="/login">
           <input class="form-control mr-sm-2" type="text" placeholder="Type Username..." name="username">
           <button class="btn btn-primary mr-sm-2" type="submit">Login</button>
@@ -23,7 +23,7 @@
           <button class="btn btn-danger" type="submit">Register</button>
         </form>
       <% } else { %>
-        <span class ="pr-4 nav-link">Logged in as: <%= username %>  </span>
+        <span class ="pr-4 nav-link">Logged in as: <%= user.email %>  </span>
         <form class="form-inline" method="POST" action="/logout"> 
           <button class="btn btn-danger my-2 my-sm-0">Logout</button>
         </form>

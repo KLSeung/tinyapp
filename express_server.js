@@ -29,6 +29,7 @@ const urlDatabase = {
 //Global user information
 const users = {};
 
+//Generates random strings for shortURL
 const generateRandomString = () => {
   const alphaNumeric = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let randomString = '';
@@ -36,6 +37,17 @@ const generateRandomString = () => {
     randomString += alphaNumeric[Math.round(Math.random() * alphaNumeric.length - 1)];
   }
   return randomString;
+};
+
+//Checks if user already exists or if the email or password inputted is blank
+const findUserByEmail = (email) => {
+  for (let id in users) {
+    const user = users[id];
+    if (user.email === email) {
+      return user;
+    }
+  }
+  return null;
 };
 
 //GET root directory
@@ -46,10 +58,10 @@ app.get('/', (req, res) => {
 //GET urls to render url list into urls_index
 app.get("/urls", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     urls: urlDatabase
   };
-
+  console.log(templateVars);
   // let urlList = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
@@ -57,7 +69,7 @@ app.get("/urls", (req, res) => {
 //GET new route to render urls_new
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
@@ -72,17 +84,28 @@ app.post("/urls", (req, res) => {
 //GET method for registration page
 app.get("/register", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    user:  users[req.cookies["user_id"]]
   };
   res.render("urls_register", templateVars);
 });
 
 //POST method to store user information in unique id
 app.post("/register", (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status('400').send('Email or password cannot be empty!');
+  } 
+
+  const foundUser = findUserByEmail(email);
+  if (foundUser) {
+    return res.status('400').send('User with this email address already exists!');
+  }
+
   const uuid = uuidv4().split("-")[2];
   users[uuid]  = {
-    username: req.body.email,
-    password: req.body.password
+    email,
+    password
   };
   res.cookie('user_id', uuid);
   console.log(users);
@@ -92,7 +115,7 @@ app.post("/register", (req, res) => {
 //GET requested shortURL with its corresponding longURL and render both onto urls_show
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    user:  users[req.cookies["user_id"]],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
   };
@@ -125,7 +148,7 @@ app.post("/login", (req, res) => {
 
 //POST method for user to logout
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
