@@ -12,14 +12,22 @@ const cookieParser = require('cookie-parser');
 
 app.use(cookieParser());
 
+//require uuid to create unique ids for account identifiers
+const { v4: uuidv4 } = require('uuid');
+
+
 //Set view engine as ejs
 app.set('view engine', 'ejs');
 
 
+//Global url Database
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+//Global user information
+const users = {};
 
 const generateRandomString = () => {
   const alphaNumeric = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -69,12 +77,15 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
+//POST method to store user information in unique id
 app.post("/register", (req, res) => {
-  let templateVars = {
+  const uuid = uuidv4().split("-")[2];
+  users[uuid]  = {
     username: req.body.email,
     password: req.body.password
   };
-  console.log(templateVars);
+  res.cookie('user_id', uuid);
+  console.log(users);
   res.redirect("urls");
 });
 
