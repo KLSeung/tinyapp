@@ -15,10 +15,8 @@ app.use(cookieParser());
 //require uuid to create unique ids for account identifiers
 const { v4: uuidv4 } = require('uuid');
 
-
 //Set view engine as ejs
 app.set('view engine', 'ejs');
-
 
 //Global url Database
 const urlDatabase = {
@@ -66,6 +64,9 @@ app.get("/urls", (req, res) => {
 
 //GET new route to render urls_new
 app.get("/urls/new", (req, res) => {
+  if (!req.cookies['user_id']) {
+    res.redirect("/login");
+  }
   let templateVars = {
     user: users[req.cookies["user_id"]]
   };
@@ -121,14 +122,14 @@ app.get("/login", (req, res) => {
 
 //POST method for user login to set cookies
 app.post("/login", (req, res) => {
-  const { email, password } = req.body
+  const { email, password } = req.body;
   if (!email || !password) {
     return res.status('403').send("Email or password cannot be blank!");
   }
 
   const foundUser = findUserByEmail(email);
-  if(foundUser === null) {
-    return res.status('403').send("User with this email address does not exist!")
+  if (foundUser === null) {
+    return res.status('403').send("User with this email address does not exist!");
   }
 
   if (foundUser.password !== password) {
