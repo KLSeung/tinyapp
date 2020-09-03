@@ -23,7 +23,7 @@
       <h2><b>Edit</b></h2>
       <div class="d-flex align-items-center justify-content-center">
         <label><h5>New URL:</h5></label>
-        <form method="POST" action="./<%= shortURL %>/edit">
+        <form method="POST" action="./<%= shortURL %>?_method=PUT">
           <input type="text" placeholder="http://" name="newLongURL">
           <button class="btn btn-primary" type="submit">Update</button>
         </form>

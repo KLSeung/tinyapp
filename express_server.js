@@ -2,12 +2,12 @@ const express = require('express');
 const app = express();
 const PORT = 8080; //default port 8080
 
-//require body parser as a dependency to make buffers readable
+//Require body parser as a dependency to make buffers readable
 const bodyParser = require("body-parser");
 
 app.use(bodyParser.urlencoded({extended: true}));
 
-//require cookie session as a dependency in order to encrypt cookies
+//Require cookie session as a dependency in order to encrypt cookies
 const cookieSession = require('cookie-session');
 
 app.use(cookieSession({
@@ -15,10 +15,10 @@ app.use(cookieSession({
   keys: ['asdsafewaffas']
 }));
 
-//require uuid to create unique ids for account identifiers
+//Require uuid to create unique ids for account identifiers
 const { v4: uuidv4 } = require('uuid');
 
-//require bcrypt for hashing passwords
+//Require bcrypt for hashing passwords
 const bcrypt = require('bcrypt');
 
 //Set view engine as ejs
@@ -32,6 +32,11 @@ const users = {};
 
 //Import helper functions
 const { findUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
+
+//Require method override in order to send PUT and DELETE requests as query parameters
+const methodOverride = require('method-override');
+
+app.use(methodOverride('_method'));
 
 //GET root directory
 app.get('/', (req, res) => {
@@ -179,7 +184,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 //POST request to remove url resource
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   //Check if the user has permission to delete the shortURL
   if (req.session.user_id !== urlDatabase[shortURL].userID) {
@@ -190,7 +195,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 //POST method once user edits the longURL of a pre-existing shortURL
-app.post("/urls/:shortURL/edit", (req, res) => {
+app.put("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   //Check if the user has permission to edit the shortURL
   if (req.session.user_id !== urlDatabase[shortURL].userID) {
