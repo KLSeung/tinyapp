@@ -15,6 +15,9 @@ app.use(cookieParser());
 //require uuid to create unique ids for account identifiers
 const { v4: uuidv4 } = require('uuid');
 
+//require bcrypt for hashing passwords
+const bcrypt = require('bcrypt');
+
 //Set view engine as ejs
 app.set('view engine', 'ejs');
 
@@ -106,7 +109,6 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
 
- 
   if (!email || !password) {
     return res.status('400').send('Email or password cannot be blank!');
   }
@@ -116,11 +118,13 @@ app.post("/register", (req, res) => {
     return res.status('400').send('User with this email address already exists!');
   }
 
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   const uuid = uuidv4().split("-")[2];
   users[uuid]  = {
     id: uuid,
     email,
-    password
+    password: hashedPassword
   };
   res.cookie('user_id', uuid);
   res.redirect("urls");
@@ -145,8 +149,8 @@ app.post("/login", (req, res) => {
   if (foundUser === null) {
     return res.status('403').send("User with this email address does not exist!");
   }
-
-  if (foundUser.password !== password) {
+  
+  if (!bcrypt.compareSync(password, foundUser.password)) {
     return res.status('403').send("Password does not match email address");
   }
 
