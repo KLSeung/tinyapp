@@ -15,6 +15,11 @@ app.use(cookieSession({
   keys: ['asdsafewaffas']
 }));
 
+//Require cookie parser for setting cookies for url visitors
+const cookieParser = require('cookie-parser');
+
+app.use(cookieParser());
+
 //Require uuid to create unique ids for account identifiers
 const { v4: uuidv4 } = require('uuid');
 
@@ -75,7 +80,13 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
   //Add new url with the random string generated as its shortURL and attach the longURL and userID to it
-  urlDatabase[randomString] = { longURL: req.body.longURL, userID: req.session.user_id };
+  urlDatabase[randomString] = {
+    longURL: req.body.longURL,
+    userID: req.session.user_id,
+    visitCount: 0,
+    uniqueVisitors: [],
+    uniqueVisitCount: 0
+  };
   res.redirect(`/urls/${randomString}`);
 });
 
@@ -174,12 +185,28 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //GET requested shortURL and redirect to the longURL
 app.get("/u/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
+  const shortURLObj = urlDatabase[req.params.shortURL];
   //Check if this shortURL exists
-  if (!urlDatabase[shortURL]) {
+  if (!shortURLObj) {
     return res.status('403').send("This shortURL does not exist!");
   }
-  const longURL = urlDatabase[shortURL].longURL;
+  const longURL = shortURLObj.longURL;
+  //Add visitCount by 1
+  urlDatabase[req.params.shortURL].visitCount += 1;
+  
+  const uniqueVisitors = shortURLObj.uniqueVisitors;
+  const visitorID = req.cookies["tinyapp_visitor_id"];
+  //Set cookie when there is no tinyapp_visitor_id
+
+  if (!visitorID) {
+    const uuid = uuidv4();
+    res.cookie("tinyapp_visitor_id", uuid);
+    uniqueVisitors.push(uuid);
+  } else if (!uniqueVisitors.includes(visitorID)) {
+    uniqueVisitors.push(visitorID);
+  }
+  console.log(visitorID);
+
   res.redirect(longURL);
 });
 
