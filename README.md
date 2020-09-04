@@ -8,7 +8,7 @@ TinyApp allows the users to view how many total visits there were and the count 
 !["Screenshot of URLs page"](https://github.com/KLSeung/tinyapp/blob/master/docs/urls.png)
 !["Screenshot of URL edit page"](https://github.com/KLSeung/tinyapp/blob/master/docs/url_show.png)
 !["Screenshot of register page"](https://github.com/KLSeung/tinyapp/blob/master/docs/url_register.png)
-!["Screenshot of register page"](https://github.com/KLSeung/tinyapp/blob/master/docs/url_login.png)
+!["Screenshot of login page"](https://github.com/KLSeung/tinyapp/blob/master/docs/urls_login.png)
 
 
 ## Dependencies
