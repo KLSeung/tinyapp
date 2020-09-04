@@ -46,6 +46,7 @@ app.use(methodOverride('_method'));
 //GET root directory
 app.get('/', (req, res) => {
   const userID = req.session.user_id;
+  //Redirect user if they're not logged in to login page
   if (!userID) {
     res.redirect("/login");
   }
@@ -79,7 +80,7 @@ app.get("/urls/new", (req, res) => {
 //POST new shortURL - longURL pair onto urlDatabase and redirect to the new shortURL
 app.post("/urls", (req, res) => {
   const randomString = generateRandomString();
-  //Add new url with the random string generated as its shortURL and attach the longURL and userID to it
+  //Add new url with the random string generated as its shortURL and attach required parameters onto it
   urlDatabase[randomString] = {
     longURL: req.body.longURL,
     userID: req.session.user_id,
@@ -95,7 +96,7 @@ app.post("/urls", (req, res) => {
 //GET method for registration page
 app.get("/register", (req, res) => {
   const user = users[req.session.user_id];
-  //Check if user is already logged in
+  //Check if user is already logged in and redirect if they are
   if (user) {
     res.redirect('/urls');
   }
@@ -136,7 +137,7 @@ app.post("/register", (req, res) => {
 //GET method for login page
 app.get("/login", (req, res) => {
   const user = users[req.session.user_id];
-  //Check if user is already logged in
+  //Check if user is already logged in and redirect if they are
   if (user) {
     res.redirect('/urls');
   }
@@ -206,6 +207,9 @@ app.get("/u/:shortURL", (req, res) => {
   if (!visitorID) {
     const uuid = uuidv4();
     res.cookie("tinyapp_visitor_id", uuid);
+    //We're pushing uuid instead of the visitorID because for some reason the visitorID starts as undefined
+    //Even when the cookie is set, my best guess is the cookie setting is an Async function...
+    //So if I pushed the cookie before it is set, it would be undefined (come back later to fix if you find out how)
     uniqueVisitors.push(uuid);
     shortURLObj.visitors.push(uuid);
   
