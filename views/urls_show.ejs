@@ -29,6 +29,27 @@
         </form>
       </div>
     </div>
+    <div class="card text-center">
+      <div class="card-header">ShortURL Visit Log</div>
+        <div class="card-body">
+          <table class="table text-center">
+            <thead>
+              <tr>
+                <th scope="col">Time visited</th>
+                <th scope="col">User ID</th>
+              </tr>
+            </thead>
+            <tbody>
+                <% for (let i = 0; i < visitors.length; i++) { %> 
+                <tr>
+                  <td><%= timeStamps[i] %></td>
+                  <td><%= visitors[i] %></td>
+                </tr>
+                <% } %>
+            </tbody>
+          </table>
+        </div>
+    </div>
   <% } %> 
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

@@ -85,7 +85,9 @@ app.post("/urls", (req, res) => {
     userID: req.session.user_id,
     visitCount: 0,
     uniqueVisitors: [],
-    uniqueVisitCount: 0
+    uniqueVisitCount: 0,
+    visitors: [],
+    timeStamps: []
   };
   res.redirect(`/urls/${randomString}`);
 });
@@ -165,9 +167,10 @@ app.post("/login", (req, res) => {
 //GET requested shortURL with its corresponding longURL and render both onto urls_show
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+  const shortURLObj = urlDatabase[shortURL];
   
   //Check if this shortURL exists
-  if (!urlDatabase[shortURL]) {
+  if (!shortURLObj) {
     return res.status('403').send("This shortURL does not exist!");
   }
 
@@ -176,9 +179,11 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     user:  users[userID],
     shortURL: shortURL,
-    longURL: urlDatabase[shortURL].longURL,
+    longURL: shortURLObj.longURL,
     userID,
-    shortURLUser: urlDatabase[shortURL].userID,
+    shortURLUser: shortURLObj.userID,
+    visitors: shortURLObj.visitors,
+    timeStamps: shortURLObj.timeStamps
   };
   res.render("urls_show", templateVars);
 });
@@ -191,21 +196,33 @@ app.get("/u/:shortURL", (req, res) => {
     return res.status('403').send("This shortURL does not exist!");
   }
   const longURL = shortURLObj.longURL;
-  //Add visitCount by 1
+  //Add visitCount by 1 everytime someone visits the page
   urlDatabase[req.params.shortURL].visitCount += 1;
   
   const uniqueVisitors = shortURLObj.uniqueVisitors;
   const visitorID = req.cookies["tinyapp_visitor_id"];
-  //Set cookie when there is no tinyapp_visitor_id
 
+  //Set a visitor cookie if the user doesn't have a visitor cookie set
   if (!visitorID) {
     const uuid = uuidv4();
     res.cookie("tinyapp_visitor_id", uuid);
     uniqueVisitors.push(uuid);
+    shortURLObj.visitors.push(uuid);
+  
+  //Push cookie if the user has a visitor cookie, but isn't included in the unique visitor array
   } else if (!uniqueVisitors.includes(visitorID)) {
     uniqueVisitors.push(visitorID);
   }
-  console.log(visitorID);
+  
+  //add Timestamp and the user to the shortURL object when a user visits the page
+  const date = new Date();
+  const timestamp = date.toString();
+
+  shortURLObj.timeStamps.push(timestamp);
+  //Push visitorID if it already exists
+  if (visitorID) {
+    shortURLObj.visitors.push(visitorID);
+  }
 
   res.redirect(longURL);
 });
